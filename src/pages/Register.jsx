@@ -50,7 +50,7 @@ const Register = () => {
             <hr />
 
             <button onClick={handleGoogleLogin}>
-                Zaloguj się przez Google
+                Zarejestruj się przez Google
             </button>
 
             {message && <p>{message}</p>}
