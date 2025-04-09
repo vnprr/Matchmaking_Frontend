@@ -9,6 +9,7 @@ import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import PrivateRoute from './routes/PrivateRoute';
 import Verify from './pages/Verify';
+import OAuth2RedirectHandler from './components/OAuth2RedirectHandler';
 
 function App() {
     return (
@@ -21,7 +22,7 @@ function App() {
                         <Route path="/verify" element={<Verify />} />
                         <Route path="/verify-account" element={<ResendVerificationEmail />} />
                         <Route path="/register" element={<Register />} />
-                        {/* Trasy zabezpieczone: */}
+                        <Route path="/oauth-callback" element={<OAuth2RedirectHandler />} />                        {/* Trasy zabezpieczone: */}
                         <Route element={<PrivateRoute />}>
                             <Route path="/" element={<Dashboard />} />
                             <Route path="/profile" element={<Profile />} />

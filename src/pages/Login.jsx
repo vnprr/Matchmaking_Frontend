@@ -1,129 +1,36 @@
-// import { createContext, useContext, useState, useEffect } from 'react';
-//
-// const AuthContext = createContext();
-//
-// export const AuthProvider = ({ children }) => {
-//     const [authState, setAuthState] = useState({
-//         isLoggedIn: !!localStorage.getItem('jwtToken'),
-//         token: localStorage.getItem('jwtToken') || '',
-//         email: localStorage.getItem('userEmail') || '',
-//         role: localStorage.getItem('userRole') || ''
-//     });
-//
-//     const login = (token, email, role) => {
-//         localStorage.setItem('jwtToken', token);
-//         localStorage.setItem('userEmail', email);
-//         localStorage.setItem('userRole', role);
-//         setAuthState({ isLoggedIn: true, token, email, role });
-//     };
-//
-//     const logout = () => {
-//         localStorage.removeItem('jwtToken');
-//         localStorage.removeItem('userEmail');
-//         localStorage.removeItem('userRole');
-//         setAuthState({ isLoggedIn: false, token: '', email: '', role: '' });
-//     };
-//
-//     useEffect(() => {
-//         const token = localStorage.getItem('jwtToken');
-//         if (!token) {
-//             setAuthState({ isLoggedIn: false, token: '', email: '', role: '' });
-//         }
-//     }, []);
-//
-//     return (
-//         <AuthContext.Provider value={{ ...authState, login, logout }}>
-//             {children}
-//         </AuthContext.Provider>
-//     );
-// };
-//
-// export const useAuth = () => useContext(AuthContext);
-
-
-//
-// import { useState } from 'react';
-// import { useNavigate } from 'react-router-dom';
-// import api from '../services/api';
-//
-// const Login = () => {
-//     const [email, setEmail] = useState('');
-//     const [password, setPassword] = useState('');
-//     const [error, setError] = useState('');
-//     const navigate = useNavigate();
-//
-//     const handleLogin = async (e) => {
-//         e.preventDefault();
-//         try {
-//             const { data } = await api.post('/api/auth/login', { email, password });
-//             localStorage.setItem('jwtToken', data.token);
-//             localStorage.setItem('userEmail', data.email);
-//             localStorage.setItem('userRole', data.role);
-//             navigate('/');
-//         } catch (err) {
-//             if (err.response && err.response.status === 403) {
-//                 navigate('/verify-account', { state: { email } });
-//             } else {
-//                 setError('Logowanie nieudane. Sprawdź email i hasło.');
-//             }
-//         }
-//     };
-//
-//     const handleGoogleLogin = () => {
-//         window.location.href = 'http://localhost:8080/oauth2/authorization/google';
-//     };
-//
-//     return (
-//         <div>
-//             <h2>Zaloguj się</h2>
-//             <form onSubmit={handleLogin}>
-//                 <input
-//                     type="email"
-//                     value={email}
-//                     placeholder="Twój email"
-//                     onChange={(e) => setEmail(e.target.value)}
-//                     required
-//                 />
-//                 <input
-//                     type="password"
-//                     value={password}
-//                     placeholder="Twoje hasło"
-//                     onChange={(e) => setPassword(e.target.value)}
-//                     required
-//                 />
-//                 <button type="submit">Zaloguj się</button>
-//             </form>
-//
-//             <hr />
-//
-//             <button onClick={handleGoogleLogin}>
-//                 Zaloguj się przez Google
-//             </button>
-//
-//             {error && <p>{error}</p>}
-//         </div>
-//     );
-// };
-//
-// export default Login;
-
+import {
+    Button,
+    FormControl,
+    Input,
+    Stack,
+    Heading,
+    Text,
+    Container,
+    useColorModeValue,
+    Divider,
+} from '@chakra-ui/react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import {FcGoogle} from "react-icons/fc";
+import {HiHeart} from "react-icons/hi";
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const { login } = useAuth();  // Pobieramy funkcję login z kontekstu
 
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
             const { data } = await api.post('/api/auth/login', { email, password });
-            localStorage.setItem('jwtToken', data.token);
-            localStorage.setItem('userEmail', data.email);
-            localStorage.setItem('userRole', data.role);
+
+            // Wywołanie login z poprawnymi argumentami
+            login(data.token, data.email, data.role);
+
             navigate('/');
         } catch (err) {
             if (err.response && err.response.status === 403) {
@@ -139,34 +46,52 @@ const Login = () => {
     };
 
     return (
-        <div>
-            <h2>Zaloguj się</h2>
-            <form onSubmit={handleLogin}>
-                <input
-                    type="email"
-                    value={email}
-                    placeholder="Twój email"
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                />
-                <input
-                    type="password"
-                    value={password}
-                    placeholder="Twoje hasło"
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
-                <button type="submit">Zaloguj się</button>
-            </form>
+        <Container maxW="md" py={12}>
+            <Stack
+                spacing={4}
+                bg={useColorModeValue('white', 'gray.700')}
+                rounded="xl"
+                boxShadow="lg"
+                p={6}
+            >
+                <Heading size="lg">Zaloguj się</Heading>
+                <form onSubmit={handleLogin}>
+                    <Stack spacing={4}>
+                        <FormControl id="email">
+                            <Input
+                                type="email"
+                                value={email}
+                                placeholder="Twój email"
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                            />
+                        </FormControl>
+                        <FormControl id="password">
+                            <Input
+                                type="password"
+                                value={password}
+                                placeholder="Twoje hasło"
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                            />
+                        </FormControl>
+                        <Button type="submit" colorScheme="blue">
+                            Zaloguj się
+                        </Button>
+                    </Stack>
+                </form>
 
-            <hr />
+                <Divider />
 
-            <button onClick={handleGoogleLogin}>
-                Zaloguj się przez Google
-            </button>
+                <Button onClick={handleGoogleLogin} variant="outline" leftIcon={<FcGoogle />}>
+                    Zaloguj się przez Google
+                </Button>
 
-            {error && <p>{error}</p>}
-        </div>
+                {error && (
+                    <Text color="red.500">{error}</Text>
+                )}
+            </Stack>
+        </Container>
     );
 };
 
