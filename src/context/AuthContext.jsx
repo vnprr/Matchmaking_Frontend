@@ -6,21 +6,24 @@ export const AuthProvider = ({ children }) => {
     const [authState, setAuthState] = useState({
         isLoggedIn: !!localStorage.getItem('jwtToken'),
         email: localStorage.getItem('userEmail') || '',
-        role: localStorage.getItem('userRole') || ''
+        role: localStorage.getItem('userRole') || '',
+        authProvider: localStorage.getItem('authProvider') || 'LOCAL'
     });
 
-    const login = (token, email, role) => {
+    const login = (token, email, role, provider) => {
         localStorage.setItem('jwtToken', token);
         localStorage.setItem('userEmail', email);
         localStorage.setItem('userRole', role);
-        setAuthState({ isLoggedIn: true, email, role });
+        localStorage.setItem('authProvider', provider);
+        setAuthState({ isLoggedIn: true, email, role, provider });
     };
 
     const logout = () => {
         localStorage.removeItem('jwtToken');
         localStorage.removeItem('userEmail');
         localStorage.removeItem('userRole');
-        setAuthState({ isLoggedIn: false, email: '', role: '' });
+        localStorage.removeItem('authProvider');
+        setAuthState({ isLoggedIn: false, email: '', role: '', provider: '' });
     };
 
     return (

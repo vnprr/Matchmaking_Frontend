@@ -49,9 +49,10 @@ function OAuth2RedirectHandler() {
                         localStorage.setItem('jwtToken', token);
                         localStorage.setItem('userEmail', email);
                         localStorage.setItem('userRole', role);
+                        localStorage.setItem('authProvider', 'GOOGLE');
 
                         // Dopiero potem aktualizuj kontekst
-                        login(token, email, role);
+                        login(token, email, role, 'GOOGLE');
 
                         // Przekieruj bezpośrednio do dashboard, nie do strony głównej
                         window.location.href = '/dashboard';
