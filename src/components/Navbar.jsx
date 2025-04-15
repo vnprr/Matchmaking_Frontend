@@ -16,15 +16,39 @@ import {
     Avatar,
     MenuGroup,
     MenuDivider,
-    Badge
+    Badge,
+    Spinner
 } from '@chakra-ui/react';
+import { useState, useEffect } from 'react';
 import { HamburgerIcon, LockIcon, SettingsIcon } from '@chakra-ui/icons';
 import { FiUsers, FiSettings } from 'react-icons/fi';
+import api from '../services/api';
 
 const Navbar = () => {
     const { isLoggedIn, email, role } = useAuth();
     const logout = useLogout();
     const isAdmin = role === 'ADMIN';
+    const [profileImage, setProfileImage] = useState(null);
+    const [loading, setLoading] = useState(false);
+
+    // Pobranie zdjęcia profilowego
+    useEffect(() => {
+        const fetchProfileImage = async () => {
+            if (!isLoggedIn) return;
+
+            try {
+                setLoading(true);
+                const response = await api.get('/api/profile/main-image');
+                setProfileImage(response.data?.url || null);
+            } catch (err) {
+                console.error('Błąd pobierania zdjęcia profilowego:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProfileImage();
+    }, [isLoggedIn]);
 
     // Określanie koloru obrysu na podstawie abonamentu (roli)
     const getAvatarBorderColor = () => {
@@ -76,15 +100,19 @@ const Navbar = () => {
 
                             <Button onClick={logout} colorScheme="blue">Wyloguj</Button>
 
-                            <Avatar
-                                size="sm"
-                                name={email}
-                                src="https://bit.ly/broken-link"
-                                border="2px solid"
-                                borderColor={getAvatarBorderColor()}
-                                as={RouterLink}
-                                to="/profile"
-                            />
+                            {loading ? (
+                                <Spinner size="sm" />
+                            ) : (
+                                <Avatar
+                                    size="sm"
+                                    name={email}
+                                    src={profileImage}
+                                    border="2px solid"
+                                    borderColor={getAvatarBorderColor()}
+                                    as={RouterLink}
+                                    to="/profile"
+                                />
+                            )}
 
                             {isAdmin && (
                                 <Badge colorScheme="red">Admin</Badge>
@@ -111,12 +139,17 @@ const Navbar = () => {
                             {isLoggedIn ? (
                                 <>
                                     <MenuItem icon={
-                                        <Avatar
-                                            size="sm"
-                                            name={email}
-                                            border="2px solid"
-                                            borderColor={getAvatarBorderColor()}
-                                        />
+                                        loading ? (
+                                            <Spinner size="sm" />
+                                        ) : (
+                                            <Avatar
+                                                size="sm"
+                                                name={email}
+                                                src={profileImage}
+                                                border="2px solid"
+                                                borderColor={getAvatarBorderColor()}
+                                            />
+                                        )
                                     } as={RouterLink} to="/profile">
                                         Profil
                                     </MenuItem>

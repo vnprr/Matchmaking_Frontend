@@ -29,7 +29,6 @@ import {
     Input,
     Switch,
     Textarea,
-    Select,
     Alert,
     AlertIcon,
     HStack
@@ -73,16 +72,16 @@ const AdminProfileSections = () => {
         try {
             setSaving(true);
 
+            const sectionToSave = {
+                name: currentSection.name,
+                description: currentSection.description,
+                required: currentSection.required,
+                visible: currentSection.visible
+            };
+
             if (currentSection.id) {
                 // Aktualizacja istniejącej sekcji
-                await api.put(`/api/admin/profile-sections/${currentSection.id}`, {
-                    name: currentSection.name,
-                    code: currentSection.code,
-                    description: currentSection.description,
-                    type: currentSection.type,
-                    required: currentSection.required,
-                    active: currentSection.active
-                });
+                await api.put(`/api/admin/profile-sections/${currentSection.id}`, sectionToSave);
 
                 toast({
                     title: 'Sekcja zaktualizowana',
@@ -92,14 +91,7 @@ const AdminProfileSections = () => {
                 });
             } else {
                 // Tworzenie nowej sekcji
-                await api.post('/api/admin/profile-sections', {
-                    name: currentSection.name,
-                    code: currentSection.code,
-                    description: currentSection.description,
-                    type: currentSection.type,
-                    required: currentSection.required,
-                    active: currentSection.active
-                });
+                await api.post('/api/admin/profile-sections', sectionToSave);
 
                 toast({
                     title: 'Sekcja utworzona',
@@ -129,18 +121,19 @@ const AdminProfileSections = () => {
     const handleAddNew = () => {
         setCurrentSection({
             name: '',
-            code: '',
             description: '',
-            type: 'TEXT',
             required: false,
-            active: true
+            visible: true
         });
         onOpen();
     };
 
     // Otwórz modal do edycji istniejącej sekcji
     const handleEdit = (section) => {
-        setCurrentSection({ ...section });
+        setCurrentSection({
+            ...section,
+            visible: section.active // Mapowanie active na visible, jeśli backend jeszcze używa active
+        });
         onOpen();
     };
 
@@ -250,10 +243,8 @@ const AdminProfileSections = () => {
                             <Tr bg={useColorModeValue('gray.50', 'gray.700')}>
                                 <Th>LP.</Th>
                                 <Th>Nazwa</Th>
-                                <Th>Kod</Th>
-                                <Th>Typ</Th>
                                 <Th>Wymagane</Th>
-                                <Th>Status</Th>
+                                <Th>Widoczne</Th>
                                 <Th width="180px">Akcje</Th>
                             </Tr>
                         </Thead>
@@ -263,10 +254,8 @@ const AdminProfileSections = () => {
                                     <Tr key={section.id}>
                                         <Td>{index + 1}</Td>
                                         <Td>{section.name}</Td>
-                                        <Td>{section.code}</Td>
-                                        <Td>{section.type}</Td>
                                         <Td>{section.required ? 'Tak' : 'Nie'}</Td>
-                                        <Td>{section.active ? 'Aktywna' : 'Nieaktywna'}</Td>
+                                        <Td>{section.active ? 'Tak' : 'Nie'}</Td>
                                         <Td>
                                             <HStack spacing={2}>
                                                 <IconButton
@@ -303,7 +292,7 @@ const AdminProfileSections = () => {
                                 ))
                             ) : (
                                 <Tr>
-                                    <Td colSpan={7} textAlign="center" py={4}>
+                                    <Td colSpan={5} textAlign="center" py={4}>
                                         Brak zdefiniowanych sekcji profilu
                                     </Td>
                                 </Tr>
@@ -333,15 +322,6 @@ const AdminProfileSections = () => {
                                 />
                             </FormControl>
 
-                            <FormControl mb={4} isRequired>
-                                <FormLabel>Kod sekcji</FormLabel>
-                                <Input
-                                    name="code"
-                                    value={currentSection?.code || ''}
-                                    onChange={handleInputChange}
-                                />
-                            </FormControl>
-
                             <FormControl mb={4}>
                                 <FormLabel>Opis</FormLabel>
                                 <Textarea
@@ -349,22 +329,6 @@ const AdminProfileSections = () => {
                                     value={currentSection?.description || ''}
                                     onChange={handleInputChange}
                                 />
-                            </FormControl>
-
-                            <FormControl mb={4} isRequired>
-                                <FormLabel>Typ sekcji</FormLabel>
-                                <Select
-                                    name="type"
-                                    value={currentSection?.type || 'TEXT'}
-                                    onChange={handleInputChange}
-                                >
-                                    <option value="TEXT">Tekst</option>
-                                    <option value="TEXTAREA">Obszar tekstowy</option>
-                                    <option value="NUMBER">Liczba</option>
-                                    <option value="DATE">Data</option>
-                                    <option value="SELECT">Lista wyboru</option>
-                                    <option value="CHECKBOX">Pole wyboru</option>
-                                </Select>
                             </FormControl>
 
                             <FormControl mb={4} display="flex" alignItems="center">
@@ -377,10 +341,10 @@ const AdminProfileSections = () => {
                             </FormControl>
 
                             <FormControl mb={4} display="flex" alignItems="center">
-                                <FormLabel mb="0">Aktywna</FormLabel>
+                                <FormLabel mb="0">Widoczne</FormLabel>
                                 <Switch
-                                    name="active"
-                                    isChecked={currentSection?.active}
+                                    name="visible"
+                                    isChecked={currentSection?.visible}
                                     onChange={handleInputChange}
                                 />
                             </FormControl>
