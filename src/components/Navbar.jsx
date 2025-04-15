@@ -23,6 +23,7 @@ import { useState, useEffect } from 'react';
 import { HamburgerIcon, LockIcon, SettingsIcon } from '@chakra-ui/icons';
 import { FiUsers, FiSettings } from 'react-icons/fi';
 import api from '../services/api';
+import ProfileAvatar from "./profile/ProfileAvatar.jsx";
 
 const Navbar = () => {
     const { isLoggedIn, email, role } = useAuth();
@@ -103,15 +104,19 @@ const Navbar = () => {
                             {loading ? (
                                 <Spinner size="sm" />
                             ) : (
-                                <Avatar
+                                <ProfileAvatar
                                     size="sm"
                                     name={email}
-                                    src={profileImage}
-                                    border="2px solid"
-                                    borderColor={getAvatarBorderColor()}
-                                    as={RouterLink}
-                                    to="/profile"
                                 />
+                                // <Avatar
+                                //     size="sm"
+                                //     name={email}
+                                //     src={profileImage}
+                                //     border="2px solid"
+                                //     borderColor={getAvatarBorderColor()}
+                                //     as={RouterLink}
+                                //     to="/profile"
+                                // />
                             )}
 
                             {isAdmin && (
@@ -142,13 +147,14 @@ const Navbar = () => {
                                         loading ? (
                                             <Spinner size="sm" />
                                         ) : (
-                                            <Avatar
-                                                size="sm"
-                                                name={email}
-                                                src={profileImage}
-                                                border="2px solid"
-                                                borderColor={getAvatarBorderColor()}
-                                            />
+                                            <ProfileAvatar></ProfileAvatar>
+                                            // <Avatar
+                                            //     size="sm"
+                                            //     name={email}
+                                            //     src={profileImage}
+                                            //     border="2px solid"
+                                            //     borderColor={getAvatarBorderColor()}
+                                            // />
                                         )
                                     } as={RouterLink} to="/profile">
                                         Profil

@@ -6,8 +6,8 @@ import { useAuth } from '../../context/AuthContext';
 const ProfilePersonalInfo = ({ profile: initialProfile }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const { role } = useAuth();
-    const bgColor = useColorModeValue('gray.50', 'gray.600');
+    // const { role } = useAuth();
+    // const bgColor = useColorModeValue('gray.50', 'gray.600');
 
     // Formatowanie daty
     const formatDate = (dateString) => {
@@ -52,16 +52,14 @@ const ProfilePersonalInfo = ({ profile: initialProfile }) => {
             ) : (
                 <Box borderRadius="md">
                     {initialProfile?.firstName && initialProfile?.lastName && (
-                        <Box>
+                        <Box mb={2}>
                             <Heading as="h1" size="2xl" >
                                 {initialProfile.firstName} {initialProfile.lastName}
                             </Heading>
-
                         </Box>
                     )}
 
                     <Stack spacing={3}>
-
                         {age && (
                             <Box>
                                 <Text fontWeight="bold" fontSize="sm" color="gray.500">

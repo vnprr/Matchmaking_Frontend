@@ -11,7 +11,9 @@ import {
 import ProfileImages from '../components/profile/ProfileImages';
 import ProfileSections from '../components/profile/ProfileSections';
 import ProfilePersonalInfo from '../components/profile/ProfilePersonalInfo';
+import Gallery from "../components/Gallery.jsx";
 import api from '../services/api';
+import ProfileAvatar from "../components/profile/ProfileAvatar.jsx";
 
 const Profile = () => {
     const [profile, setProfile] = useState(null);
@@ -50,7 +52,10 @@ const Profile = () => {
                     <Spinner size="xl" />
                 </Flex>
             ) : (
-                <Flex direction="column" gap={6}>
+                <Flex direction="column" md="row" gap={6} minChildWidth="250px">
+
+                    <ProfileAvatar borderRadius="none" size="2xl"></ProfileAvatar>
+
                     {/* Nowy komponent z danymi osobowymi */}
                     <ProfilePersonalInfo profile={profile} />
 
@@ -59,6 +64,8 @@ const Profile = () => {
 
                     {/* Komponent z sekcjami profilu */}
                     <ProfileSections />
+
+                    <Gallery />
                 </Flex>
             )}
         </Container>
