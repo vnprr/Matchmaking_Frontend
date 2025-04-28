@@ -13,11 +13,11 @@ const ProfileAvatar = ({ size = "md", ...props }) => {
         const fetchProfileImage = async () => {
             try {
                 setLoading(true);
-                const response = await api.get('/api/profile/images/profile-image');
+                const response = await api.get('/api/profile/images/main');
                 setProfileImage(response.data?.imageUrl || null);
             } catch (err) {
                 console.error('Błąd pobierania zdjęcia profilowego:', err);
-                setError('Nie udało się pobrać zdjęcia profilowego');
+                setProfileImage(null);
             } finally {
                 setLoading(false);
             }

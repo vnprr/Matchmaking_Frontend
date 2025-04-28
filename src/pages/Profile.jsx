@@ -1,73 +1,48 @@
-import { useState, useEffect } from 'react';
-import {
-    Container,
-    Box,
-    Heading,
-    Flex,
-    Spinner,
-    Alert,
-    AlertIcon
-} from '@chakra-ui/react';
-import ProfileImages from '../components/profile/ProfileImages';
-import ProfileSections from '../components/profile/ProfileSections';
+import { Box, Container, Flex, Text, Heading, Badge, Spinner, Alert, AlertIcon } from '@chakra-ui/react';
+import { useProfileContext } from '../context/ProfileContext';
 import ProfilePersonalInfo from '../components/profile/ProfilePersonalInfo';
-import Gallery from "../components/Gallery.jsx";
-import api from '../services/api';
-import ProfileAvatar from "../components/profile/ProfileAvatar.jsx";
 
 const Profile = () => {
-    const [profile, setProfile] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+    const { isEditable, isViewable, profileId, loading, error } = useProfileContext();
 
-    useEffect(() => {
-        const fetchProfile = async () => {
-            try {
-                setLoading(true);
-                setError('');
-                const profileResponse = await api.get('/api/profile');
-                setProfile(profileResponse.data);
-            } catch (err) {
-                console.error('Błąd pobierania profilu:', err);
-                setError('Nie udało się pobrać danych profilu');
-            } finally {
-                setLoading(false);
-            }
-        };
+    if (loading) {
+        return (
+            <Container maxW="container.md" py={8}>
+                <Flex justify="center" align="center" minH="200px">
+                    <Spinner size="xl" />
+                </Flex>
+            </Container>
+        );
+    }
 
-        fetchProfile();
-    }, []);
-
-    return (
-        <Container maxW="container.lg" py={8}>
-            {error && (
-                <Alert status="error" mb={4}>
+    if (error) {
+        return (
+            <Container maxW="container.md" py={8}>
+                <Alert status="error" borderRadius="md">
                     <AlertIcon />
                     {error}
                 </Alert>
-            )}
+            </Container>
+        );
+    }
 
-            {loading ? (
-                <Flex justify="center" py={10}>
-                    <Spinner size="xl" />
+    return (
+        <Container maxW="container.md" py={8}>
+            <Box borderWidth="1px" borderRadius="lg" p={6} boxShadow="md">
+                <Heading size="md" mb={4}>Informacje o kontekście profilu</Heading>
+                <Text mb={2}>ID profilu: {profileId}</Text>
+                <Text mb={2}>Możliwość edycji: {isEditable ? "Tak" : "Nie"}</Text>
+                <Text mb={2}>Widoczność profilu: {isViewable ? "Tak" : "Nie"}</Text>
+                <Flex gap={2} mt={4}>
+                    <Badge colorScheme={isEditable ? "green" : "red"}>
+                        {isEditable ? "Edytowalny" : "Nieedytowalny"}
+                    </Badge>
+                    <Badge colorScheme={isViewable ? "green" : "red"}>
+                        {isViewable ? "Widoczny" : "Niewidoczny"}
+                    </Badge>
                 </Flex>
-            ) : (
-                <Flex direction="column" md="row" gap={6} minChildWidth="250px">
-
-                    <ProfileAvatar borderRadius="none" size="2xl"></ProfileAvatar>
-
-                    {/* Nowy komponent z danymi osobowymi */}
-                    <ProfilePersonalInfo profile={profile} />
-
-                    {/* Komponent z galerią zdjęć */}
-                    <ProfileImages />
-
-                    {/* Komponent z sekcjami profilu */}
-                    <ProfileSections />
-
-                    <Gallery />
-                </Flex>
-            )}
+                <ProfilePersonalInfo />
+            </Box>
         </Container>
     );
 };

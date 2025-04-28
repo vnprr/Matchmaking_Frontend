@@ -30,7 +30,7 @@ const Gallery = () => {
         const fetchImages = async () => {
             try {
                 setLoading(true);
-                const response = await api.get('/api/profile/images');
+                const response = await api.get('/api/profile/images/all');
                 setImages(response.data || []);
 
                 // Ustaw indeks głównego zdjęcia (jeśli jest)

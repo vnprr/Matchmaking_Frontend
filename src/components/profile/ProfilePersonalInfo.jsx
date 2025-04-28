@@ -1,104 +1,97 @@
 // src/components/profile/ProfilePersonalInfo.jsx
+import { Box, Text, Input, Button, Stack, useToast, Select } from '@chakra-ui/react';
+import { useProfileContext } from '../../context/ProfileContext';
 import { useState, useEffect } from 'react';
-import { Box, Text, Heading, Stack, useColorModeValue, Spinner, Alert, AlertIcon } from '@chakra-ui/react';
-import { useAuth } from '../../context/AuthContext';
 
-const ProfilePersonalInfo = ({ profile: initialProfile }) => {
+const genderOptions = [
+    { value: '', label: 'Nie wybrano' },
+    { value: 'MALE', label: 'Mężczyzna' },
+    { value: 'FEMALE', label: 'Kobieta' }
+];
+
+const ProfilePersonalInfo = () => {
+    const { personal, isEditable, updatePersonal } = useProfileContext();
+    const [edit, setEdit] = useState(false);
+    const [form, setForm] = useState({
+        firstName: '',
+        lastName: '',
+        gender: '',
+        dateOfBirth: '',
+        bio: ''
+    });
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
-    // const { role } = useAuth();
-    // const bgColor = useColorModeValue('gray.50', 'gray.600');
+    const toast = useToast();
 
-    // Formatowanie daty
-    const formatDate = (dateString) => {
-        if (!dateString) return '';
-        const date = new Date(dateString);
-        if (isNaN(date.getTime())) return '';
-        return date.toLocaleDateString('pl-PL');
+    useEffect(() => {
+        setForm({
+            firstName: personal?.firstName || '',
+            lastName: personal?.lastName || '',
+            gender: personal?.gender || '',
+            dateOfBirth: personal?.dateOfBirth || '',
+            bio: personal?.bio || ''
+        });
+    }, [personal]);
+
+    const handleChange = (e) => {
+        setForm({ ...form, [e.target.name]: e.target.value });
     };
 
-    // Wyliczenie wieku na podstawie daty urodzenia
-    const calculateAge = (dateOfBirth) => {
-        if (!dateOfBirth) return null;
-
-        const birthDate = new Date(dateOfBirth);
-        if (isNaN(birthDate.getTime())) return null;
-
-        const today = new Date();
-        let age = today.getFullYear() - birthDate.getFullYear();
-        const monthDiff = today.getMonth() - birthDate.getMonth();
-
-        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-            age--;
-        }
-
-        return age;
+    const handleSave = async () => {
+        setLoading(true);
+        try {
+            const dataToSend = Object.fromEntries(
+                Object.entries(form).map(([k, v]) => [k, v === '' ? null : v])
+            );
+            await updatePersonal(dataToSend);
+            toast({title: "Zapisano zmiany", status: "success", duration: 2000});
+            setEdit(false);
+            // } catch {
+            //     toast({ title: "Błąd zapisu", status: "error", duration: 2000 });
+            } catch (e) {
+                toast({
+                    title: "Błąd zapisu",
+                    status: "error",
+                    duration: 4000,
+                    description: e?.response?.data?.message || e?.message || "Nieznany błąd"
+                });
+            } finally {
+                setLoading(false);
+            }
     };
 
-    // Obliczanie wieku jeśli nie jest dostarczone bezpośrednio
-    const age = initialProfile?.age || (initialProfile?.dateOfBirth ? calculateAge(initialProfile.dateOfBirth) : null);
+    if (!personal) return null;
 
     return (
-        <Box width="100%" mb={4}>
-            {error && (
-                <Alert status="error" mb={4}>
-                    <AlertIcon />
-                    {error}
-                </Alert>
-            )}
-
-            {loading ? (
-                <Spinner size="md" />
-            ) : (
-                <Box borderRadius="md">
-                    {initialProfile?.firstName && initialProfile?.lastName && (
-                        <Box mb={2}>
-                            <Heading as="h1" size="2xl" >
-                                {initialProfile.firstName} {initialProfile.lastName}
-                            </Heading>
-                        </Box>
-                    )}
-
-                    <Stack spacing={3}>
-                        {age && (
-                            <Box>
-                                <Text fontWeight="bold" fontSize="sm" color="gray.500">
-                                    Wiek: {age} lat</Text>
-                            </Box>
-                        )}
-
-                        {initialProfile?.gender && (
-                            <Box>
-                                <Text fontWeight="bold" fontSize="sm" color="gray.500">
-                                    Płeć:
-                                </Text>
-                                <Text>
-                                    {initialProfile.gender === 'MALE' ? 'Mężczyzna' :
-                                        initialProfile.gender === 'FEMALE' ? 'Kobieta' :
-                                            initialProfile.gender}
-                                </Text>
-                            </Box>
-                        )}
-
-                        {/*{initialProfile?.dateOfBirth && (*/}
-                        {/*    <Box>*/}
-                        {/*        <Text fontWeight="bold" fontSize="sm" color="gray.500">*/}
-                        {/*            Data urodzenia:*/}
-                        {/*        </Text>*/}
-                        {/*        <Text>{formatDate(initialProfile.dateOfBirth)}</Text>*/}
-                        {/*    </Box>*/}
-                        {/*)}*/}
-
-                        {/*{initialProfile?.bio && (*/}
-                        {/*    <Box>*/}
-                        {/*        <Text fontWeight="bold" fontSize="sm" color="gray.500">*/}
-                        {/*            O mnie:*/}
-                        {/*        </Text>*/}
-                        {/*        <Text>{initialProfile.bio}</Text>*/}
-                        {/*    </Box>*/}
-                        {/*)}*/}
+        <Box mt={6}>
+            {edit ? (
+                <Stack spacing={2}>
+                    <Input name="firstName" value={form.firstName} onChange={handleChange} placeholder="Imię" />
+                    <Input name="lastName" value={form.lastName} onChange={handleChange} placeholder="Nazwisko" />
+                    <Select name="gender" value={form.gender || ''} onChange={handleChange} placeholder="Wybierz płeć">
+                        {genderOptions.map(opt => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                    </Select>
+                    <Input name="dateOfBirth" value={form.dateOfBirth} onChange={handleChange} placeholder="Data urodzenia" type="date" />
+                    <Input name="bio" value={form.bio} onChange={handleChange} placeholder="Bio" />
+                    <Stack direction="row">
+                        <Button colorScheme="blue" onClick={handleSave} isLoading={loading}>Zapisz</Button>
+                        <Button onClick={() => setEdit(false)} variant="ghost">Anuluj</Button>
                     </Stack>
-                </Box>
+                </Stack>
+            ) : (
+                <>
+                    <Text><b>Imię:</b> {personal.firstName}</Text>
+                    <Text><b>Nazwisko:</b> {personal.lastName}</Text>
+                    <Text><b>Płeć:</b> {personal.gender === 'MALE' ? 'Mężczyzna' : personal.gender === 'FEMALE' ? 'Kobieta' : ''}</Text>
+                    <Text><b>Data urodzenia:</b> {personal.dateOfBirth}</Text>
+                    <Text><b>Bio:</b> {personal.bio}</Text>
+                    {isEditable && (
+                        <Button mt={3} size="sm" onClick={() => setEdit(true)}>
+                            Edytuj dane
+                        </Button>
+                    )}
+                </>
             )}
         </Box>
     );
