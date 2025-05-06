@@ -109,7 +109,7 @@ function App() {
                                     <Profile />
                                 </ProfileProvider>
                             } />
-                            <Route path="/profile/:userId" element={
+                            <Route path="/profile/:profileId" element={  // Zmiana z :userId na :profileId
                                 <ProfileProvider>
                                     <Profile />
                                 </ProfileProvider>
