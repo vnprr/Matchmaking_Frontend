@@ -7,31 +7,20 @@ import {
     Box,
     Heading,
     Button,
-    Flex,
-    FormControl,
-    FormLabel,
-    Input,
-    Select,
-    Stack,
     Divider,
     useColorModeValue,
-    Badge,
-    Stat,
-    StatLabel,
-    StatNumber,
-    Text,
     Alert,
     AlertIcon,
     useToast,
     Spinner,
-    Switch,
-    FormErrorMessage,
-    Textarea,
-    IconButton,
-    ButtonGroup,
-    HStack
+    Flex
 } from '@chakra-ui/react';
 import { ArrowBackIcon } from '@chakra-ui/icons';
+import AdminUserStats from '../../components/admin/AdminUserStats';
+import AdminUserSecurity from '../../components/admin/AdminUserSecurity';
+import AdminUserProfileForm from '../../components/admin/AdminUserProfileForm';
+import AdminUserAccountForm from '../../components/admin/AdminUserAccountForm';
+import AdminUserRecommendations from '../../components/admin/AdminUserRecommendations';
 
 const AdminUserDetails = () => {
     const { userId } = useParams();
@@ -43,10 +32,6 @@ const AdminUserDetails = () => {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
-
-    // Stan dla nowego hasła
-    const [newPassword, setNewPassword] = useState('');
-    const [passwordError, setPasswordError] = useState('');
 
     const bgColor = useColorModeValue('white', 'gray.700');
     const statBgColor = useColorModeValue('blue.50', 'blue.900');
@@ -71,31 +56,6 @@ const AdminUserDetails = () => {
         }
     }, [userId]);
 
-    // Walidacja hasła
-    const validatePassword = (password) => {
-        if (!password) return true; // Puste hasło jest ok (nie zmieniamy)
-
-        if (password.length < 8) {
-            setPasswordError('Hasło musi mieć minimum 8 znaków');
-            return false;
-        }
-        if (!/[A-Z]/.test(password)) {
-            setPasswordError('Hasło musi zawierać co najmniej jedną wielką literę');
-            return false;
-        }
-        if (!/[a-z]/.test(password)) {
-            setPasswordError('Hasło musi zawierać co najmniej jedną małą literę');
-            return false;
-        }
-        if (!/[0-9]/.test(password)) {
-            setPasswordError('Hasło musi zawierać co najmniej jedną cyfrę');
-            return false;
-        }
-
-        setPasswordError('');
-        return true;
-    };
-
     // Obsługa zmiany danych
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -114,13 +74,8 @@ const AdminUserDetails = () => {
     };
 
     // Zapisywanie zmian
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e, newPassword = null) => {
         e.preventDefault();
-
-        // Walidacja hasła, jeśli zostało podane
-        if (newPassword && !validatePassword(newPassword)) {
-            return;
-        }
 
         try {
             setSaving(true);
@@ -136,7 +91,6 @@ const AdminUserDetails = () => {
             await api.put(`/api/admin/users/${userId}`, updatedData);
 
             setSuccess('Dane użytkownika zostały zaktualizowane');
-            setNewPassword('');
 
             toast({
                 title: 'Zapisano zmiany',
@@ -176,6 +130,8 @@ const AdminUserDetails = () => {
                 isClosable: true
             });
         } catch (err) {
+            // Ustawiamy błąd w stanie zamiast nieużywanej zmiennej
+            setError('Nie udało się zmienić statusu konta');
             toast({
                 title: 'Błąd',
                 description: 'Nie udało się zmienić statusu konta',
@@ -204,6 +160,8 @@ const AdminUserDetails = () => {
                 isClosable: true
             });
         } catch (err) {
+            // Ustawiamy błąd w stanie zamiast nieużywanej zmiennej
+            setError('Nie udało się zresetować licznika prób logowania');
             toast({
                 title: 'Błąd',
                 description: 'Nie udało się zresetować licznika prób logowania',
@@ -260,210 +218,70 @@ const AdminUserDetails = () => {
 
             {userData && (
                 <Box
-                    as="form"
-                    onSubmit={handleSubmit}
                     bg={bgColor}
                     rounded="xl"
                     boxShadow="lg"
                     p={6}
                 >
-                    <Stack spacing={6}>
-                        {/* Statystyki konta */}
-                        <Box p={4} bg={statBgColor} rounded="md">
-                            <Flex wrap="wrap" gap={16} justify="space-between">
-                                <Stat>
-                                    <StatLabel>ID użytkownika</StatLabel>
-                                    <StatNumber>{userData.id}</StatNumber>
-                                </Stat>
-                                <Stat>
-                                    <StatLabel>Data utworzenia</StatLabel>
-                                    <StatNumber fontSize="md">{formatDate(userData.createdAt)}</StatNumber>
-                                </Stat>
-                                <Stat>
-                                    <StatLabel>Ostatnia aktualizacja</StatLabel>
-                                    <StatNumber fontSize="md">{formatDate(userData.updatedAt)}</StatNumber>
-                                </Stat>
-                                <Stat>
-                                    <StatLabel>Dostawca</StatLabel>
-                                    <StatNumber fontSize="md">{userData.provider}</StatNumber>
-                                </Stat>
-                                <Stat>
-                                    <StatLabel>Status</StatLabel>
-                                    <Badge
-                                        colorScheme={userData.enabled ? 'green' : 'red'}
-                                        fontSize="md"
-                                        py={1}
-                                        px={2}
-                                    >
-                                        {userData.enabled ? 'Aktywny' : 'Zablokowany'}
-                                    </Badge>
-                                </Stat>
-                            </Flex>
-                        </Box>
+                    <AdminUserStats
+                        userData={userData}
+                        formatDate={formatDate}
+                        statBgColor={statBgColor}
+                    />
 
-                        {/* Podstawowe dane konta */}
-                        <Box>
-                            <Heading size="md" mb={4}>Dane konta</Heading>
+                    <Divider mt={6} mb={6} />
 
-                            <Stack spacing={4} direction={{ base: 'column', md: 'row' }} mb={4}>
-                                <FormControl>
-                                    <FormLabel>Email</FormLabel>
-                                    <Input
-                                        name="email"
-                                        value={userData.email}
-                                        onChange={handleChange}
-                                    />
-                                </FormControl>
+                    {/* Dane konta */}
+                    <Box>
+                        <Heading size="md" mb={4}>Dane konta</Heading>
+                        <AdminUserAccountForm
+                            userData={userData}
+                            handleChange={handleChange}
+                            onSubmit={handleSubmit}
+                            saving={saving}
+                        />
+                    </Box>
 
+                    <Divider mt={6} mb={6} />
 
-                            </Stack>
+                    {/* Bezpieczeństwo konta */}
+                    <Box>
+                        <Heading size="md" mb={4}>Bezpieczeństwo konta</Heading>
+                        <AdminUserSecurity
+                            userData={userData}
+                            toggleAccountStatus={toggleAccountStatus}
+                            resetLoginAttempts={resetLoginAttempts}
+                            formatDate={formatDate}
+                        />
+                    </Box>
 
-                            <Stack spacing={4} direction={{ base: 'column', md: 'row' }} mb={4}>
-                                <FormControl isInvalid={!!passwordError}>
-                                    <FormLabel>Nowe hasło</FormLabel>
-                                    <Input
-                                        type="password"
-                                        placeholder="Pozostaw puste, aby nie zmieniać"
-                                        value={newPassword}
-                                        onChange={(e) => setNewPassword(e.target.value)}
-                                    />
-                                    <Text fontSize="xs" color="gray.500">
-                                        Min. 8 znaków, wielka i mała litera, cyfra
-                                    </Text>
-                                    {passwordError && <FormErrorMessage>{passwordError}</FormErrorMessage>}
-                                </FormControl>
+                    <Divider mt={6} mb={6} />
 
-                                <FormControl>
-                                    <FormLabel>Rola</FormLabel>
-                                    <Select
-                                        name="role"
-                                        value={userData.role}
-                                        onChange={handleChange}
-                                    >
-                                        <option value="USER">USER</option>
-                                        <option value="ADMIN">ADMIN</option>
-                                    </Select>
-                                </FormControl>
-                            </Stack>
-                        </Box>
+                    {/* Dane profilu */}
+                    <Box>
+                        <Heading size="md" mb={4}>Profil użytkownika</Heading>
+                        <AdminUserProfileForm
+                            userData={userData}
+                            handleChange={handleChange}
+                            handleDateChange={handleDateChange}
+                        />
 
-                        <Divider />
-
-                        {/* Bezpieczeństwo konta */}
-                        <Box>
-                            <Heading size="md" mb={4}>Bezpieczeństwo konta</Heading>
-
-                            <Flex
-                                direction={{ base: 'column', md: 'row' }}
-                                justify="space-between"
-                                align="center"
-                                gap={4}
-                                mb={4}
-                            >
-                                <Box>
-                                    <Text fontWeight="bold">Status konta</Text>
-                                    <FormControl display="flex" alignItems="center">
-                                        <Switch
-                                            id="account-status"
-                                            isChecked={userData.enabled}
-                                            onChange={toggleAccountStatus}
-                                            colorScheme="green"
-                                        />
-                                        <FormLabel htmlFor="account-status" mb="0" ml={2}>
-                                            {userData.enabled ? 'Aktywne' : 'Zablokowane'}
-                                        </FormLabel>
-                                    </FormControl>
-                                </Box>
-
-                                <Box>
-                                    <Text fontWeight="bold">Nieudane próby logowania</Text>
-                                    <HStack>
-                                        <Badge colorScheme="red" fontSize="md">{userData.failedLoginAttempts}</Badge>
-                                        <Button size="sm" onClick={resetLoginAttempts}>
-                                            Resetuj
-                                        </Button>
-                                    </HStack>
-                                </Box>
-
-                                <Box>
-                                    <Text fontWeight="bold">Blokada do</Text>
-                                    <Text>{userData.accountLockedUntil ? formatDate(userData.accountLockedUntil) : 'Brak'}</Text>
-                                </Box>
-                            </Flex>
-                        </Box>
-
-                        <Divider />
-
-                        {/* Dane profilu */}
-                        <Box>
-                            <Heading size="md" mb={4}>Profil użytkownika</Heading>
-
-                            <Stack spacing={4} direction={{ base: 'column', md: 'row' }} mb={4}>
-                                <FormControl>
-                                    <FormLabel>Imię</FormLabel>
-                                    <Input
-                                        name="firstName"
-                                        value={userData.firstName || ''}
-                                        onChange={handleChange}
-                                    />
-                                </FormControl>
-
-                                <FormControl>
-                                    <FormLabel>Nazwisko</FormLabel>
-                                    <Input
-                                        name="lastName"
-                                        value={userData.lastName || ''}
-                                        onChange={handleChange}
-                                    />
-                                </FormControl>
-                            </Stack>
-
-                            <Stack spacing={4} direction={{ base: 'column', md: 'row' }} mb={4}>
-                                <FormControl>
-                                    <FormLabel>Płeć</FormLabel>
-                                    <Select
-                                        name="gender"
-                                        value={userData.gender || ''}
-                                        onChange={handleChange}
-                                    >
-                                        <option value="">-- Wybierz --</option>
-                                        <option value="MALE">Mężczyzna</option>
-                                        <option value="FEMALE">Kobieta</option>
-                                    </Select>
-                                </FormControl>
-
-                                <FormControl>
-                                    <FormLabel>Data urodzenia</FormLabel>
-                                    <Input
-                                        type="date"
-                                        value={userData.dateOfBirth || ''}
-                                        onChange={handleDateChange}
-                                    />
-                                </FormControl>
-                            </Stack>
-
-                            <FormControl mb={4}>
-                                <FormLabel>Bio</FormLabel>
-                                <Textarea
-                                    name="bio"
-                                    value={userData.bio || ''}
-                                    onChange={handleChange}
-                                    rows={5}
-                                />
-                            </FormControl>
-                        </Box>
-
-                        {/* Przyciski akcji */}
-                        <Flex justify="flex-end" gap={4} pt={2}>
+                        {/* Przycisk zapisz dla profilu */}
+                        <Flex justify="flex-end" gap={4} pt={4}>
                             <Button
                                 colorScheme="blue"
-                                type="submit"
+                                onClick={handleSubmit}
                                 isLoading={saving}
                             >
-                                Zapisz zmiany
+                                Zapisz profil
                             </Button>
                         </Flex>
-                    </Stack>
+                    </Box>
+                    <Divider mt={6} mb={6} />
+                    <Box>
+                        <Heading size="md" mb={4}>Rekomendacje</Heading>
+                        <AdminUserRecommendations userId={userId} />
+                    </Box>
                 </Box>
             )}
         </Container>

@@ -83,6 +83,7 @@ import AdminUserDetails from './pages/admin/AdminUserDetails';
 import AdminConfig from './pages/admin/AdminConfig';
 import AdminProfileSections from "./pages/admin/AdminProfileSections.jsx";
 
+
 import { ProfileProvider } from './context/ProfileContext';
 
 
@@ -109,7 +110,7 @@ function App() {
                                     <Profile />
                                 </ProfileProvider>
                             } />
-                            <Route path="/profile/:profileId" element={  // Zmiana z :userId na :profileId
+                            <Route path="/profile/:profileId" element={
                                 <ProfileProvider>
                                     <Profile />
                                 </ProfileProvider>

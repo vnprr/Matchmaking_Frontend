@@ -24,6 +24,7 @@ import { HamburgerIcon, LockIcon, SettingsIcon } from '@chakra-ui/icons';
 import { FiUsers, FiSettings } from 'react-icons/fi';
 import api from '../services/api';
 import ProfileAvatar from "./profile/ProfileAvatar.jsx";
+import NotificationsMenu from "./NotificationsMenu.jsx";
 
 const Navbar = () => {
     const { isLoggedIn, email, role } = useAuth();
@@ -100,7 +101,7 @@ const Navbar = () => {
                             </Button>
 
                             <Button onClick={logout} colorScheme="blue">Wyloguj</Button>
-
+                            <NotificationsMenu />
                             {loading ? (
                                 <Spinner size="sm" />
                             ) : (

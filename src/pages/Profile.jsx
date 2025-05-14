@@ -1,6 +1,7 @@
 import { Box, Container, Flex, Text, Heading, Badge, Spinner, Alert, AlertIcon } from '@chakra-ui/react';
 import { useProfileContext } from '../context/ProfileContext';
 import ProfilePersonalInfo from '../components/profile/ProfilePersonalInfo';
+import ProfileSections from '../components/profile/ProfileSections';
 
 const Profile = () => {
     const { isEditable, isViewable, profileId, loading, error } = useProfileContext();
@@ -42,6 +43,7 @@ const Profile = () => {
                     </Badge>
                 </Flex>
                 <ProfilePersonalInfo />
+                <ProfileSections />
             </Box>
         </Container>
     );
