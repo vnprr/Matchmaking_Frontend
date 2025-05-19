@@ -19,7 +19,7 @@ import {
 } from '@chakra-ui/react';
 import { BellIcon } from '@chakra-ui/icons';
 import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
+import api from '../../services/api.js';
 
 const NotificationsMenu = () => {
     const [notifications, setNotifications] = useState([]);

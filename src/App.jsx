@@ -64,7 +64,7 @@
 // src/App.jsx - zmodyfikowany
 import { AuthProvider } from './context/AuthContext';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Navbar from './components/Navbar';
+import Navbar from './components/navbar/Navbar.jsx';
 import Login from './pages/Login';
 import ResendVerificationEmail from "./pages/ResendVerificationEmail.jsx";
 import Register from './pages/Register';
@@ -85,6 +85,7 @@ import AdminProfileSections from "./pages/admin/AdminProfileSections.jsx";
 
 
 import { ProfileProvider } from './context/ProfileContext';
+import ChatPage from "./pages/ChatPage.jsx";
 
 
 function App() {
@@ -116,6 +117,7 @@ function App() {
                                 </ProfileProvider>
                             } />
                             <Route path="/account-security" element={<AccountSecurityPage />} />
+                            <Route path="/chat" element={<ChatPage />} />
                         </Route>
 
                         {/* Trasy zabezpieczone tylko dla administratorów: */}

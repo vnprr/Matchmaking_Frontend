@@ -1,7 +1,7 @@
 // src/components/Navbar.jsx
 import { Link as RouterLink } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import useLogout from './Logout';
+import { useAuth } from '../../context/AuthContext.jsx';
+import useLogout from '../Logout.jsx';
 import {
     Box,
     Flex,
@@ -22,9 +22,10 @@ import {
 import { useState, useEffect } from 'react';
 import { HamburgerIcon, LockIcon, SettingsIcon } from '@chakra-ui/icons';
 import { FiUsers, FiSettings } from 'react-icons/fi';
-import api from '../services/api';
-import ProfileAvatar from "./profile/ProfileAvatar.jsx";
+import api from '../../services/api.js';
+import ProfileAvatar from "../profile/ProfileAvatar.jsx";
 import NotificationsMenu from "./NotificationsMenu.jsx";
+import NavbarChatIcon from "./ChatIcon.jsx";
 
 const Navbar = () => {
     const { isLoggedIn, email, role } = useAuth();
@@ -102,6 +103,7 @@ const Navbar = () => {
 
                             <Button onClick={logout} colorScheme="blue">Wyloguj</Button>
                             <NotificationsMenu />
+                            <NavbarChatIcon />
                             {loading ? (
                                 <Spinner size="sm" />
                             ) : (
