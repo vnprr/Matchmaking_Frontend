@@ -86,6 +86,7 @@ import AdminProfileSections from "./pages/admin/AdminProfileSections.jsx";
 
 import { ProfileProvider } from './context/ProfileContext';
 import ChatPage from "./pages/ChatPage.jsx";
+import GalleryPage from "./pages/GalleryPage.jsx";
 
 
 function App() {
@@ -106,6 +107,7 @@ function App() {
                         {/* Trasy zabezpieczone dla wszystkich zalogowanych: */}
                         <Route element={<PrivateRoute />}>
                             <Route path="/" element={<Dashboard />} />
+                            <Route path="/gallery" element={<GalleryPage />} />
                             <Route path="/profile" element={
                                 <ProfileProvider>
                                     <Profile />
