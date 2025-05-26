@@ -9,7 +9,7 @@ import { AddIcon, ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons';
 import api from '../../services/api';
 import UserSearchModal from './UserSearchModal';
 
-const AdminUserRecommendations = ({ userId }) => {
+const AdminUserRecommendations = ({ userId, profileId }) => {
     const [recommendations, setRecommendations] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -24,7 +24,7 @@ const AdminUserRecommendations = ({ userId }) => {
         try {
             setLoading(true);
             setError(null);
-            const response = await api.get(`/api/recommendations/user/${userId}`, {
+            const response = await api.get(`/api/recommendations/profile/${profileId}`, {
                 params: {
                     page: page,
                     size: 10
@@ -50,7 +50,8 @@ const AdminUserRecommendations = ({ userId }) => {
             await api.delete(`/api/recommendations/${deleteId}`);
             setRecommendations(recommendations.filter(r => r.id !== deleteId));
             setDeleteId(null);
-        } catch (error) {
+        } catch (err) {
+            console.error('Błąd podczas usuwania rekomendacji:', err);
             setError('Nie udało się usunąć rekomendacji');
         }
     };
@@ -59,18 +60,18 @@ const AdminUserRecommendations = ({ userId }) => {
         fetchRecommendations();
     }, [userId, page]);
 
-    const handleAddRecommendation = async (selectedUserId) => {
+    const handleAddRecommendation = async (selectedProfileId) => {
         try {
             await api.post('/api/recommendations', null, {
                 params: {
-                    firstUserId: userId,
-                    secondUserId: selectedUserId
+                    firstProfileId: profileId,
+                    secondProfileId: selectedProfileId
                 }
             });
             onClose();
             fetchRecommendations();
-        } catch (error) {
-            console.error('Błąd podczas dodawania rekomendacji:', error);
+        } catch (err) {
+            console.error('Błąd podczas dodawania rekomendacji:', err);
             setError('Nie udało się dodać rekomendacji');
         }
     };
@@ -98,8 +99,7 @@ const AdminUserRecommendations = ({ userId }) => {
                         <Table variant="simple">
                             <Thead>
                                 <Tr>
-                                    <Th>ID</Th>
-                                    <Th>Email rekomendowanego</Th>
+                                    <Th>Imię rekomendowanego</Th>
                                     <Th>Status</Th>
                                     <Th>Data dodania</Th>
                                     <Th>Akcje</Th>
@@ -108,8 +108,7 @@ const AdminUserRecommendations = ({ userId }) => {
                             <Tbody>
                                 {recommendations.map((recommendation) => (
                                     <Tr key={recommendation.id}>
-                                        <Td>{recommendation.recommendedUserId}</Td>
-                                        <Td>{recommendation.recommendedUserEmail}</Td>
+                                        <Td>{recommendation.recommendedProfileName}</Td>
                                         <Td>{recommendation.status}</Td>
                                         <Td>{new Date(recommendation.createdAt).toLocaleDateString('pl-PL')}</Td>
                                         <Td>

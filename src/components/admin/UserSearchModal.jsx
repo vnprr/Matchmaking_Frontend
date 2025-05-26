@@ -103,7 +103,7 @@ const UserSearchModal = ({ isOpen, onClose, onSelect, excludeUserId }) => {
                                                 <Button
                                                     size="sm"
                                                     colorScheme="blue"
-                                                    onClick={() => onSelect(user.id)}
+                                                    onClick={() => onSelect(user.profileId)}
                                                 >
                                                     Wybierz
                                                 </Button>

@@ -1,5 +1,5 @@
 // src/components/admin/AdminUserProfileForm.jsx
-import { Stack, FormControl, FormLabel, Input, Select, Textarea } from '@chakra-ui/react';
+import { Stack, FormControl, FormLabel, Input, Select, Textarea, Text, Box } from '@chakra-ui/react';
 
 const AdminUserProfileForm = ({
                                   userData,
@@ -7,6 +7,12 @@ const AdminUserProfileForm = ({
                                   handleDateChange
                               }) => (
     <>
+        <Box mb={4}>
+            <FormControl>
+                <FormLabel>ID Profilu</FormLabel>
+                <Text>{userData.profileId || 'Brak ID profilu'}</Text>
+            </FormControl>
+        </Box>
         <Stack spacing={4} direction={{ base: 'column', md: 'row' }} mb={4}>
             <FormControl>
                 <FormLabel>Imię</FormLabel>

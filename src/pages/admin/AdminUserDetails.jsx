@@ -280,7 +280,7 @@ const AdminUserDetails = () => {
                     <Divider mt={6} mb={6} />
                     <Box>
                         <Heading size="md" mb={4}>Rekomendacje</Heading>
-                        <AdminUserRecommendations userId={userId} />
+                        <AdminUserRecommendations userId={userId} profileId={userData.profileId} />
                     </Box>
                 </Box>
             )}
