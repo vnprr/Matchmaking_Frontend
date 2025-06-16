@@ -87,6 +87,7 @@ import AdminProfileSections from "./pages/admin/AdminProfileSections.jsx";
 import { ProfileProvider } from './context/ProfileContext';
 import ChatPage from "./pages/ChatPage.jsx";
 import GalleryPage from "./pages/GalleryPage.jsx";
+import ImageCropPage from "./pages/ImageCropPage.jsx";
 
 
 function App() {
@@ -108,6 +109,7 @@ function App() {
                         <Route element={<PrivateRoute />}>
                             <Route path="/" element={<Dashboard />} />
                             <Route path="/gallery" element={<GalleryPage />} />
+                            <Route path="/image-crop/:imageId" element={<ImageCropPage />} />
                             <Route path="/profile" element={
                                 <ProfileProvider>
                                     <Profile />
