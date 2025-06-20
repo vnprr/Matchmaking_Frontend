@@ -170,25 +170,6 @@ const GalleryPage = () => {
             <VStack spacing={6} align="stretch">
                 <Flex justify="space-between" align="center">
                     <Text fontSize="2xl" fontWeight="bold">Your Gallery</Text>
-                    {avatar && (
-                        <HStack>
-                            <Text>Current Avatar:</Text>
-                            <Box 
-                                borderRadius="full" 
-                                overflow="hidden" 
-                                boxSize="50px"
-                                border="2px solid"
-                                borderColor="blue.400"
-                            >
-                                <Image 
-                                    src={avatar.avatarUrl} 
-                                    alt="Avatar" 
-                                    boxSize="50px"
-                                    objectFit="cover"
-                                />
-                            </Box>
-                        </HStack>
-                    )}
                 </Flex>
 
                 {loading && <Spinner size="xl" mx="auto" />}

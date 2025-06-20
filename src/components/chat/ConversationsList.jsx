@@ -5,7 +5,6 @@ import {
     VStack,
     Text,
     Flex,
-    Avatar,
     Badge,
     Spinner,
     Input,
@@ -14,6 +13,7 @@ import {
     Divider,
     useColorModeValue
 } from '@chakra-ui/react';
+import ProfileChatAvatar from '../profile/ProfileChatAvatar';
 import { SearchIcon } from '@chakra-ui/icons';
 import { getConversations } from '../../services/chatService';
 
@@ -109,10 +109,10 @@ const ConversationsList = ({ onSelectConversation, selectedConversationId }) => 
                                     borderBottomWidth="1px"
                                 >
                                     <Flex>
-                                        <Avatar
+                                        <ProfileChatAvatar
+                                            profileId={conversation.recipientId}
                                             size="sm"
                                             name={conversation.recipientName || 'Użytkownik'}
-                                            src={conversation.recipientAvatarUrl}
                                             mr={3}
                                         />
                                         <Box flex="1" overflow="hidden">

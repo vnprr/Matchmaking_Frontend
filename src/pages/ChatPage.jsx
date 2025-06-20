@@ -11,9 +11,9 @@ import {
     IconButton,
     Spinner,
     useColorModeValue,
-    Avatar,
     useToast
 } from '@chakra-ui/react';
+import ProfileChatAvatar from '../components/profile/ProfileChatAvatar';
 import { ArrowForwardIcon } from '@chakra-ui/icons';
 import ConversationsList from '../components/chat/ConversationsList.jsx';
 import { getConversationMessages, sendMessage, markConversationAsRead } from '../services/chatService';
@@ -155,10 +155,10 @@ const ChatPage = () => {
                             <>
                                 <Box p={3} borderBottomWidth="1px">
                                     <Flex align="center">
-                                        <Avatar
+                                        <ProfileChatAvatar
+                                            profileId={selectedConversation.recipientId}
                                             size="sm"
                                             name={selectedConversation.recipientName || 'Użytkownik'}
-                                            src={selectedConversation.recipientAvatarUrl}
                                             mr={3}
                                         />
                                         <Text fontWeight="bold">{selectedConversation.recipientName || 'Użytkownik'}</Text>

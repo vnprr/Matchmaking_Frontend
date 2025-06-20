@@ -13,16 +13,12 @@ import {
     MenuList,
     MenuItem,
     useColorModeValue,
-    Avatar,
     MenuGroup,
     MenuDivider,
-    Badge,
-    Spinner
+    Badge
 } from '@chakra-ui/react';
-import { useState, useEffect } from 'react';
 import { HamburgerIcon, LockIcon, SettingsIcon } from '@chakra-ui/icons';
 import { FiUsers, FiSettings } from 'react-icons/fi';
-import api from '../../services/api.js';
 import ProfileAvatar from "../profile/ProfileAvatar.jsx";
 import NotificationsMenu from "./NotificationsMenu.jsx";
 import NavbarChatIcon from "./ChatIcon.jsx";
@@ -31,37 +27,6 @@ const Navbar = () => {
     const { isLoggedIn, email, role } = useAuth();
     const logout = useLogout();
     const isAdmin = role === 'ADMIN';
-    const [profileImage, setProfileImage] = useState(null);
-    const [loading, setLoading] = useState(false);
-
-    // Pobranie zdjęcia profilowego
-    useEffect(() => {
-        const fetchProfileImage = async () => {
-            if (!isLoggedIn) return;
-
-            try {
-                setLoading(true);
-                const response = await api.get('/api/profile/main-image');
-                setProfileImage(response.data?.url || null);
-            } catch (err) {
-                console.error('Błąd pobierania zdjęcia profilowego:', err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchProfileImage();
-    }, [isLoggedIn]);
-
-    // Określanie koloru obrysu na podstawie abonamentu (roli)
-    const getAvatarBorderColor = () => {
-        switch(role) {
-            case 'ADMIN':
-                return 'red.500';
-            default:
-                return 'gray.300';
-        }
-    };
 
     return (
         <Box as="nav" bg={useColorModeValue('white', 'gray.800')} py={3} px={4} boxShadow="sm">
@@ -104,23 +69,12 @@ const Navbar = () => {
                             <Button onClick={logout} colorScheme="blue">Wyloguj</Button>
                             <NotificationsMenu />
                             <NavbarChatIcon />
-                            {loading ? (
-                                <Spinner size="sm" />
-                            ) : (
-                                <ProfileAvatar
-                                    size="sm"
-                                    name={email}
-                                />
-                                // <Avatar
-                                //     size="sm"
-                                //     name={email}
-                                //     src={profileImage}
-                                //     border="2px solid"
-                                //     borderColor={getAvatarBorderColor()}
-                                //     as={RouterLink}
-                                //     to="/profile"
-                                // />
-                            )}
+                            <ProfileAvatar
+                                size="sm"
+                                name={email}
+                                as={RouterLink}
+                                to="/profile"
+                            />
 
                             {isAdmin && (
                                 <Badge colorScheme="red">Admin</Badge>
@@ -146,20 +100,7 @@ const Navbar = () => {
                         <MenuList>
                             {isLoggedIn ? (
                                 <>
-                                    <MenuItem icon={
-                                        loading ? (
-                                            <Spinner size="sm" />
-                                        ) : (
-                                            <ProfileAvatar></ProfileAvatar>
-                                            // <Avatar
-                                            //     size="sm"
-                                            //     name={email}
-                                            //     src={profileImage}
-                                            //     border="2px solid"
-                                            //     borderColor={getAvatarBorderColor()}
-                                            // />
-                                        )
-                                    } as={RouterLink} to="/profile">
+                                    <MenuItem icon={<ProfileAvatar size="sm" />} as={RouterLink} to="/profile">
                                         Profil
                                     </MenuItem>
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
     Box,
     Spinner,
@@ -13,7 +13,7 @@ import {
     SliderFilledTrack,
     SliderThumb,
 } from '@chakra-ui/react';
-import { getImageById, cropImage } from '../services/galleryService';  // dodane cropImage
+import { getImageById, cropImage, setAvatarImage } from '../services/galleryService';  // dodane cropImage i setAvatarImage
 
 // Klucze w DTO
 const WIDTH_PARAM  = 'originalWidth';
@@ -22,7 +22,11 @@ const HEIGHT_PARAM = 'originalHeight';
 export default function ImageViewPage() {
     const { imageId } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
     const toast = useToast();
+
+    // Check if avatar mode is enabled via query parameter
+    const isAvatarMode = new URLSearchParams(location.search).get('avatar') === 'true';
 
     const [image, setImage]     = useState(null);
     const [loading, setLoading] = useState(true);
@@ -33,6 +37,9 @@ export default function ImageViewPage() {
     const [cropX, setCropX]           = useState(0);
     const [cropY, setCropY]           = useState(0);
 
+    // For avatar mode - single size control
+    const [squareSize, setSquareSize] = useState(0);
+
     // 1. Pobierz obraz i ustaw stany początkowe
     useEffect(() => {
         const fetchImage = async () => {
@@ -41,10 +48,28 @@ export default function ImageViewPage() {
                 const imgData = await getImageById(imageId);
                 if (!imgData.originalUrl) throw new Error('Brak originalUrl w API');
                 setImage(imgData);
-                setCropWidth(imgData[WIDTH_PARAM]);
-                setCropHeight(imgData[HEIGHT_PARAM]);
-                setCropX(0);
-                setCropY(0);
+
+                if (isAvatarMode) {
+                    // For avatar mode, initialize with a square in the center
+                    const minDimension = Math.min(imgData[WIDTH_PARAM], imgData[HEIGHT_PARAM]);
+                    const initialSize = Math.floor(minDimension * 0.8); // 80% of the smaller dimension
+
+                    // Center the square
+                    const initialX = Math.floor((imgData[WIDTH_PARAM] - initialSize) / 2);
+                    const initialY = Math.floor((imgData[HEIGHT_PARAM] - initialSize) / 2);
+
+                    setSquareSize(initialSize);
+                    setCropWidth(initialSize);
+                    setCropHeight(initialSize);
+                    setCropX(initialX);
+                    setCropY(initialY);
+                } else {
+                    // Regular mode - use full image dimensions
+                    setCropWidth(imgData[WIDTH_PARAM]);
+                    setCropHeight(imgData[HEIGHT_PARAM]);
+                    setCropX(0);
+                    setCropY(0);
+                }
             } catch (err) {
                 console.error(err);
                 toast({ status: 'error', title: 'Nie udało się załadować obrazu' });
@@ -53,14 +78,40 @@ export default function ImageViewPage() {
             }
         };
         fetchImage();
-    }, [imageId, toast]);
+    }, [imageId, toast, isAvatarMode]);
+
+    // Avatar mode - maintain square aspect ratio and update width/height when squareSize changes
+    useEffect(() => {
+        if (!image || !isAvatarMode) return;
+
+        // Calculate maximum possible square size based on current position
+        const maxSizeX = image[WIDTH_PARAM] - cropX;
+        const maxSizeY = image[HEIGHT_PARAM] - cropY;
+        const maxPossibleSize = Math.min(maxSizeX, maxSizeY);
+
+        // Ensure square size doesn't exceed image boundaries
+        if (squareSize > maxPossibleSize) {
+            setSquareSize(maxPossibleSize);
+        }
+
+        // Update width and height to match square size
+        setCropWidth(squareSize);
+        setCropHeight(squareSize);
+    }, [squareSize, cropX, cropY, image, isAvatarMode]);
 
     // 2. Wzajemne ograniczenia dla osi X
     useEffect(() => {
         if (!image) return;
         const maxW = image[WIDTH_PARAM] - cropX;
-        if (cropWidth > maxW) setCropWidth(maxW);
-    }, [cropX, image, cropWidth]);
+        if (cropWidth > maxW) {
+            if (isAvatarMode) {
+                // In avatar mode, adjust both width and height to maintain square
+                setSquareSize(maxW);
+            } else {
+                setCropWidth(maxW);
+            }
+        }
+    }, [cropX, image, cropWidth, isAvatarMode]);
 
     useEffect(() => {
         if (!image) return;
@@ -72,8 +123,15 @@ export default function ImageViewPage() {
     useEffect(() => {
         if (!image) return;
         const maxH = image[HEIGHT_PARAM] - cropY;
-        if (cropHeight > maxH) setCropHeight(maxH);
-    }, [cropY, image, cropHeight]);
+        if (cropHeight > maxH) {
+            if (isAvatarMode) {
+                // In avatar mode, adjust both width and height to maintain square
+                setSquareSize(maxH);
+            } else {
+                setCropHeight(maxH);
+            }
+        }
+    }, [cropY, image, cropHeight, isAvatarMode]);
 
     useEffect(() => {
         if (!image) return;
@@ -85,20 +143,40 @@ export default function ImageViewPage() {
     const handleSave = async () => {
         setLoading(true);
         try {
-            await cropImage(image.id, {
+            const cropData = {
                 x: cropX,
                 y: cropY,
                 width: cropWidth,
                 height: cropHeight
-            });
-            toast({ status: 'success', title: 'Kadrowanie zapisane' });
+            };
+
+            if (isAvatarMode) {
+                // Validate that width and height are identical for avatar mode
+                if (cropWidth !== cropHeight) {
+                    throw new Error('Kadrowanie avatara musi być kwadratowe (szerokość = wysokość)');
+                }
+
+                // Use avatar endpoint for avatar mode
+                await setAvatarImage(image.id, cropData);
+                toast({ status: 'success', title: 'Avatar został zaktualizowany' });
+            } else {
+                // Use regular crop endpoint for normal mode
+                await cropImage(image.id, cropData);
+                toast({ status: 'success', title: 'Kadrowanie zapisane' });
+            }
             navigate('/gallery');
         } catch (err) {
-            console.error(err);
+            console.error('Error saving crop:', err);
+
+            // Get detailed error message if available
+            const errorDetail = err.response?.data?.message || err.message;
+
             toast({
                 status: 'error',
-                title: 'Błąd zapisywania kadru',
-                description: err.message
+                title: isAvatarMode ? 'Błąd zapisywania avatara' : 'Błąd zapisywania kadru',
+                description: errorDetail,
+                duration: 6000,
+                isClosable: true
             });
         } finally {
             setLoading(false);
@@ -134,36 +212,60 @@ export default function ImageViewPage() {
             </Button>
 
             <VStack spacing={6} align="stretch">
+                {isAvatarMode && (
+                    <Text fontSize="md" fontWeight="bold" color="purple.500" textAlign="center">
+                        Tryb avatara - kadrowanie do kwadratu
+                    </Text>
+                )}
                 <Text fontSize="sm" color="gray.600" textAlign="center">
                     Oryginalny rozmiar: {image[WIDTH_PARAM]} × {image[HEIGHT_PARAM]} px
                 </Text>
 
                 {/* Suwaki */}
-                <Box>
-                    <Text mb={1}>Szerokość kadru: {cropWidth} px</Text>
-                    <Slider
-                        min={1}
-                        max={image[WIDTH_PARAM] - cropX}
-                        value={cropWidth}
-                        onChange={setCropWidth}
-                    >
-                        <SliderTrack><SliderFilledTrack/></SliderTrack>
-                        <SliderThumb boxSize={4}/>
-                    </Slider>
-                </Box>
+                {isAvatarMode ? (
+                    // Avatar mode - single size slider for square crop
+                    <Box>
+                        <Text mb={1}>Wielkość kadru: {squareSize} px</Text>
+                        <Slider
+                            min={1}
+                            max={Math.min(image[WIDTH_PARAM] - cropX, image[HEIGHT_PARAM] - cropY)}
+                            value={squareSize}
+                            onChange={setSquareSize}
+                        >
+                            <SliderTrack><SliderFilledTrack/></SliderTrack>
+                            <SliderThumb boxSize={4}/>
+                        </Slider>
+                    </Box>
+                ) : (
+                    // Regular mode - separate width and height sliders
+                    <>
+                        <Box>
+                            <Text mb={1}>Szerokość kadru: {cropWidth} px</Text>
+                            <Slider
+                                min={1}
+                                max={image[WIDTH_PARAM] - cropX}
+                                value={cropWidth}
+                                onChange={setCropWidth}
+                            >
+                                <SliderTrack><SliderFilledTrack/></SliderTrack>
+                                <SliderThumb boxSize={4}/>
+                            </Slider>
+                        </Box>
 
-                <Box>
-                    <Text mb={1}>Wysokość kadru: {cropHeight} px</Text>
-                    <Slider
-                        min={1}
-                        max={image[HEIGHT_PARAM] - cropY}
-                        value={cropHeight}
-                        onChange={setCropHeight}
-                    >
-                        <SliderTrack><SliderFilledTrack/></SliderTrack>
-                        <SliderThumb boxSize={4}/>
-                    </Slider>
-                </Box>
+                        <Box>
+                            <Text mb={1}>Wysokość kadru: {cropHeight} px</Text>
+                            <Slider
+                                min={1}
+                                max={image[HEIGHT_PARAM] - cropY}
+                                value={cropHeight}
+                                onChange={setCropHeight}
+                            >
+                                <SliderTrack><SliderFilledTrack/></SliderTrack>
+                                <SliderThumb boxSize={4}/>
+                            </Slider>
+                        </Box>
+                    </>
+                )}
 
                 <Box>
                     <Text mb={1}>Pozycja X: {cropX} px</Text>

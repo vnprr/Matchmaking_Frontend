@@ -49,8 +49,19 @@ export const cropImage = async (imageId, crop) => {
 export const setAvatarImage = async (imageId, crop) => {
     // Ensure imageId is a number
     const numericImageId = Number(imageId);
-    const res = await api.patch(`/api/profile/images/${numericImageId}/avatar`, crop);
-    return res.data;
+
+    // Log the request details for debugging
+    console.log('Setting avatar image with ID:', numericImageId);
+    console.log('Crop data:', JSON.stringify(crop));
+
+    try {
+        const res = await api.patch(`/api/profile/images/${numericImageId}/avatar`, crop);
+        console.log('Avatar update response:', res.data);
+        return res.data;
+    } catch (error) {
+        console.error('Error setting avatar image:', error.response ? error.response.data : error.message);
+        throw error;
+    }
 };
 
 // Change the display order of images
