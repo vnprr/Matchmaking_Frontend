@@ -1,85 +1,57 @@
-// src/services/galleryService.js
-import api from './api';
+import { apiCall } from '../utils/apiUtils';
 
-// Fetch all images for the current user
+const ensureNumericId = (id) => Number(id);
+
+// Pobieranie wszystkich obrazów obecnego użytkownika
 export const fetchUserImages = async () => {
-    const res = await api.get('/api/profile/me/images/all');
-    return res.data;
+    return apiCall('/api/profile/me/images/all', 'get');
 };
 
-// Fetch avatar image for the current user
+// Pobieranie głównego obrazu obecnego użytkownika
 export const fetchUserAvatar = async () => {
-    const res = await api.get('/api/profile/me/images/avatar');
-    return res.data;
+    return apiCall('/api/profile/me/images/avatar', 'get');
 };
 
-// Fetch all images for another user
+// Pobieranie obrazów profilu o id
 export const fetchProfileImages = async (profileId) => {
-    const numericProfileId = Number(profileId); // Ensure profileId is a number
-    const res = await api.get(`/api/profile/${numericProfileId}/images/all`);
-    return res.data;
+    return apiCall(`/api/profile/${ensureNumericId(profileId)}/images/all`, 'get');
 };
 
-// Fetch avatar image for another user
+// Pobieranie głównego obrazu profilu o id
 export const fetchProfileAvatar = async (profileId) => {
-    const numericProfileId = Number(profileId); // Ensure profileId is a number
-    const res = await api.get(`/api/profile/${numericProfileId}/images/avatar`);
-    return res.data;
+    return apiCall(`/api/profile/${ensureNumericId(profileId)}/images/avatar`, 'get');
 };
 
-// Upload a new image
+// wysyłanie obrazu
 export const uploadImage = async (file) => {
     const formData = new FormData();
     formData.append('file', file);
-    const res = await api.post('/api/profile', formData, {
+    return apiCall('/api/profile', 'post', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
     });
-    return res.data;
 };
 
-// Crop gallery image (affects gallery and thumbnail versions)
+//kadrowanie obrazu
 export const cropImage = async (imageId, crop) => {
-    // Ensure imageId is a number
-    const numericImageId = Number(imageId);
-    const res = await api.post(`/api/profile/images/${numericImageId}/crop`, crop);
-    return res.data;
+    return apiCall(`/api/profile/images/${ensureNumericId(imageId)}/crop`, 'post', crop);
 };
 
-// Set avatar image (requires square 1:1 crop)
+// Ustawianie obrazu jako avatar
 export const setAvatarImage = async (imageId, crop) => {
-    // Ensure imageId is a number
-    const numericImageId = Number(imageId);
-
-    // Log the request details for debugging
-    console.log('Setting avatar image with ID:', numericImageId);
-    console.log('Crop data:', JSON.stringify(crop));
-
-    try {
-        const res = await api.patch(`/api/profile/images/${numericImageId}/avatar`, crop);
-        console.log('Avatar update response:', res.data);
-        return res.data;
-    } catch (error) {
-        console.error('Error setting avatar image:', error.response ? error.response.data : error.message);
-        throw error;
-    }
+    return apiCall(`/api/profile/images/${ensureNumericId(imageId)}/avatar`, 'patch', crop);
 };
 
-// Change the display order of images
+// Zmień kolejność obrazów
 export const updateOrder = async (orderDTO) => {
-    await api.put('/api/profile/images/order', orderDTO);
+    return apiCall('/api/profile/images/order', 'put', orderDTO);
 };
 
-// Delete an image
+// Usuwanie obrazu
 export const deleteImage = async (imageId) => {
-    // Ensure imageId is a number
-    const numericImageId = Number(imageId);
-    await api.delete(`/api/profile/images/${numericImageId}`);
+    return apiCall(`/api/profile/images/${ensureNumericId(imageId)}`, 'delete');
 };
 
-// Get a single image by ID
+// Pobieranie obrazu po ID
 export const getImageById = async (imageId) => {
-    // Ensure imageId is a number
-    const numericImageId = Number(imageId);
-    const res = await api.get(`/api/profile/images/${numericImageId}`);
-    return res.data;
+    return apiCall(`/api/profile/images/${ensureNumericId(imageId)}`, 'get');
 };

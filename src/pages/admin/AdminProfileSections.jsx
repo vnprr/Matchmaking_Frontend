@@ -65,7 +65,7 @@ const AdminProfileSections = () => {
         }
     };
 
-    // Obsługa formularza
+
     const handleFormSubmit = async (e) => {
         e.preventDefault();
 
@@ -117,7 +117,7 @@ const AdminProfileSections = () => {
         }
     };
 
-    // Otwórz modal do tworzenia nowej sekcji
+
     const handleAddNew = () => {
         setCurrentSection({
             name: '',
@@ -128,7 +128,7 @@ const AdminProfileSections = () => {
         onOpen();
     };
 
-    // Otwórz modal do edycji istniejącej sekcji
+
     const handleEdit = (section) => {
         setCurrentSection({
             ...section,
@@ -165,7 +165,7 @@ const AdminProfileSections = () => {
         }
     };
 
-    // Przesuń sekcję w górę
+
     const handleMoveUp = async (id) => {
         try {
             await api.put(`/api/admin/profile-sections/${id}/move-up`);
@@ -181,7 +181,7 @@ const AdminProfileSections = () => {
         }
     };
 
-    // Przesuń sekcję w dół
+
     const handleMoveDown = async (id) => {
         try {
             await api.put(`/api/admin/profile-sections/${id}/move-down`);
@@ -197,7 +197,7 @@ const AdminProfileSections = () => {
         }
     };
 
-    // Obsługa zmiany pól formularza
+    //
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
         setCurrentSection({
@@ -302,7 +302,7 @@ const AdminProfileSections = () => {
                 )}
             </Box>
 
-            {/* Modal do dodawania/edycji sekcji */}
+
             <Modal isOpen={isOpen} onClose={onClose} size="lg">
                 <ModalOverlay />
                 <ModalContent>

@@ -45,8 +45,8 @@ const ProfilePersonalInfo = () => {
             await updatePersonal(dataToSend);
             toast({title: "Zapisano zmiany", status: "success", duration: 2000});
             setEdit(false);
-            // } catch {
-            //     toast({ title: "Błąd zapisu", status: "error", duration: 2000 });
+
+
             } catch (e) {
                 toast({
                     title: "Błąd zapisu",

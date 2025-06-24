@@ -1,37 +1,33 @@
 // src/services/chatService.js
-import api from './api';
+import { apiCall } from '../utils/apiUtils';
 
 // Pobieranie listy konwersacji z paginacją
 export const getConversations = async (page = 0, size = 10) => {
-    const response = await api.get('/api/chat/conversations', {
+    return apiCall('/api/chat/conversations', 'get', null, {
         params: { page, size }
     });
-    return response.data;
 };
 
 // Pobieranie wiadomości z konwersacji
 export const getConversationMessages = async (conversationId, page = 0, size = 20) => {
-    const response = await api.get(`/api/chat/conversations/${conversationId}/messages`, {
+    return apiCall(`/api/chat/conversations/${conversationId}/messages`, 'get', null, {
         params: { page, size }
     });
-    return response.data;
 };
 
 // Wysyłanie wiadomości do profilu
 export const sendMessage = async (recipientProfileId, content) => {
-    const response = await api.post(`/api/chat/conversations/profile/${recipientProfileId}`, {
+    return apiCall(`/api/chat/conversations/profile/${recipientProfileId}`, 'post', {
         content: content
     });
-    return response.data;
 };
 
 // Oznaczanie konwersacji jako przeczytanej
 export const markConversationAsRead = async (conversationId) => {
-    await api.patch(`/api/chat/conversations/${conversationId}/read`);
+    return apiCall(`/api/chat/conversations/${conversationId}/read`, 'patch');
 };
 
 // Pobieranie liczby nieprzeczytanych wiadomości
 export const getUnreadCount = async () => {
-    const response = await api.get('/api/chat/unread-count');
-    return response.data;
+    return apiCall('/api/chat/unread-count', 'get');
 };

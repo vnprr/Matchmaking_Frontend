@@ -142,7 +142,7 @@ const AdminUserDetails = () => {
         }
     };
 
-    // Resetowanie licznika nieudanych prób logowania
+    // Resetowanie liczby nieudanych prób logowania
     const resetLoginAttempts = async () => {
         try {
             await api.put(`/api/admin/users/${userId}/reset-login-attempts`);
@@ -172,7 +172,6 @@ const AdminUserDetails = () => {
         }
     };
 
-    // Formatowanie daty
     const formatDate = (dateString) => {
         if (!dateString) return '-';
         return new Date(dateString).toLocaleString('pl-PL');
@@ -231,7 +230,7 @@ const AdminUserDetails = () => {
 
                     <Divider mt={6} mb={6} />
 
-                    {/* Dane konta */}
+
                     <Box>
                         <Heading size="md" mb={4}>Dane konta</Heading>
                         <AdminUserAccountForm
@@ -244,7 +243,6 @@ const AdminUserDetails = () => {
 
                     <Divider mt={6} mb={6} />
 
-                    {/* Bezpieczeństwo konta */}
                     <Box>
                         <Heading size="md" mb={4}>Bezpieczeństwo konta</Heading>
                         <AdminUserSecurity
@@ -257,7 +255,6 @@ const AdminUserDetails = () => {
 
                     <Divider mt={6} mb={6} />
 
-                    {/* Dane profilu */}
                     <Box>
                         <Heading size="md" mb={4}>Profil użytkownika</Heading>
                         <AdminUserProfileForm
@@ -266,7 +263,6 @@ const AdminUserDetails = () => {
                             handleDateChange={handleDateChange}
                         />
 
-                        {/* Przycisk zapisz dla profilu */}
                         <Flex justify="flex-end" gap={4} pt={4}>
                             <Button
                                 colorScheme="blue"

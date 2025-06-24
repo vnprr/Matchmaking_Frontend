@@ -84,7 +84,6 @@ const ConversationMessages = ({ conversation, onNewMessage }) => {
         try {
             setSending(true);
 
-            // Optymistyczne aktualizowanie UI
             const tempMessage = {
                 id: `temp-${Date.now()}`,
                 content: newMessage,

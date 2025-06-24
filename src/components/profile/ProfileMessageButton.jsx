@@ -9,7 +9,6 @@ const ProfileMessageButton = ({ profileId, profileName }) => {
 
     const handleMessageClick = async () => {
         try {
-            // Konwertujemy profileId na liczbę przed wysłaniem
             const numericProfileId = Number(profileId);
 
             await sendMessage(numericProfileId, `Cześć ${profileName}! Czy możemy porozmawiać?`);
